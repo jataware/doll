@@ -1,6 +1,7 @@
 services:
   doll:
     build: .
+    image: jataware/doll:latest
     ports:
       - "5000:5000"
     volumes:
