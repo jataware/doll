@@ -12,9 +12,16 @@ def get_client() -> DockerClient:
 
 
 def list_repositories() -> dict[str, list[str]]:
-    """Parse all RepoTags from Docker into {repo: [tags]}."""
+    """Parse all RepoTags from Docker into {repo: [tags]}.
+
+    When DOLL_FILTER_REGISTRY is enabled, only images tagged with the
+    configured registry prefix (DOLL_REGISTRY) are included, and the
+    prefix is stripped from the repository name so that images appear
+    as bare names (e.g. "myapp" instead of "registry.local:5000/myapp").
+    """
     client = get_client()
     repos: dict[str, list[str]] = {}
+    registry_prefix = config.registry + "/"
     for image in client.images.list():
         for repo_tag in (image.tags or []):
             # Skip digest references like "repo@sha256:..."
@@ -24,6 +31,12 @@ def list_repositories() -> dict[str, list[str]]:
             repo, _, tag = repo_tag.rpartition(":")
             if not repo:
                 continue
+
+            if config.filter_registry:
+                if not repo.startswith(registry_prefix):
+                    continue
+                repo = repo[len(registry_prefix):]
+
             repos.setdefault(repo, []).append(tag)
     return repos
 

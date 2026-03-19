@@ -10,4 +10,11 @@ from doll.server import app
 
 if __name__ == "__main__":
     check_containerd()
-    uvicorn.run(app, host=config.host, port=config.port)
+
+    kwargs: dict = {"host": config.host, "port": config.port}
+    if config.tls_enabled:
+        kwargs["ssl_certfile"] = config.tls_cert
+        kwargs["ssl_keyfile"] = config.tls_key
+        kwargs["port"] = 443
+
+    uvicorn.run(app, **kwargs)

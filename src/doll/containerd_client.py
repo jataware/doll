@@ -63,8 +63,10 @@ def _qualify_name(name: str, tag: str) -> str:
     OCI requests come in as e.g. "library/ubuntu" or "beakerhub/server",
     but containerd stores them as "docker.io/library/ubuntu:tag" or
     "docker.io/beakerhub/server:tag".
+
+    The registry prefix is configurable via DOLL_REGISTRY (default: docker.io).
     """
-    return f"docker.io/{name}:{tag}"
+    return f"{config.registry}/{name}:{tag}"
 
 
 def get_image_target(name: str, reference: str) -> tuple[str, str, int] | None:
